@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auri Lekto - Receptor</title>
+  <style>
+    :root{
+      --bg: #071044; /* deep navy */
+      --card: #0b1220;
+      --accent: #7c3aed; /* morado */
+      --muted: #93c5fd; /* azul claro */
+    }
+  html,body{height:100%;}
+  body { font-family: Inter, 'Segoe UI', Roboto, Arial, sans-serif; background: linear-gradient(180deg,var(--bg),#081138); margin:0; padding:0; color:#e6eef6; height:100vh }
+  /* El billboard ahora ocupa toda la pantalla */
+  .card { position:fixed; inset:0; display:flex; flex-direction:column; }
+  .topbar{ position: absolute; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:center; padding:12px 20px; background: linear-gradient(90deg, rgba(10,8,36,0.6), rgba(27,10,80,0.5)); backdrop-filter: blur(6px); z-index:40 }
+  .title{ font-weight:700; letter-spacing:0.6px; color:var(--muted) }
+  .link{ color:var(--accent); text-decoration:none; font-weight:700 }
+
+  /* Letrero grande */
+  /* Fondo con patrón sutil usando SVG data URL */
+  .billboard{ background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><g fill="none" stroke="rgba(124,58,237,0.06)" stroke-width="1"><path d="M0 20 L40 20 M20 0 L20 40"/></g></svg>'); background-repeat: repeat; background-size: 40px 40px; border: none; padding: 4rem 1.5rem; border-radius: 0; display:flex; align-items:center; justify-content:center; min-height:100vh; width:100%; text-align:center; overflow:hidden; position:relative }
+  /* dejar espacio superior para la topbar (altura ~64px) */
+  .billboard{ padding-top:calc(4rem + 64px); box-sizing:border-box }
+  /* Escala el texto automáticamente hasta un máximo muy grande (aún mayor para ser muy visible) */
+    .billboard{ font-size: clamp(72px, 12vw, 260px); line-height:0.92; font-weight:900; color: #ffffff; text-transform:none; letter-spacing:-1px; text-shadow: 0 6px 20px rgba(0,0,0,0.6) }
+  /* Contenedor interno para manejar marquee */
+  .billboard .inner { display:inline-block; white-space:nowrap; will-change:transform }
+  .billboard .inner span{ display:inline-block; padding:0 16px; white-space:nowrap }
+  /* Animación marquee; la duración se establecerá dinámicamente desde JS */
+  @keyframes marquee { from { transform: translateX(100%) } to { transform: translateX(-100%) } }
+  .marquee { animation-timing-function: linear; animation-iteration-count: infinite }
+    .billboard.flash{ animation: pulseScale 900ms ease forwards }
+    @keyframes pulseScale{ 0%{ transform: scale(0.98); opacity:0.9 } 50%{ transform: scale(1.02); opacity:1 } 100%{ transform: scale(1); opacity:1 } }
+
+  .controls{ display:flex; gap:8px; justify-content:flex-end; align-items:center }
+  button{ background: linear-gradient(135deg,#2563eb 0%, #7c3aed 100%); color:white; border:none; padding:8px 14px; border-radius:8px; cursor:pointer }
+    button:hover{ opacity:0.9 }
+    .btn-clear{ background:transparent; color:var(--muted); border:1px solid rgba(255,255,255,0.03); padding:8px 12px }
+
+    @media (max-width:520px){ .billboard{ padding:1.5rem } }
+  </style>
+</head>
+<body>
+  <div class="card minimal">
+    <div class="topbar">
+      <div style="display:flex;gap:12px;align-items:center">
+        <span class="title">Receptor</span>
+        <a class="link" href="index.html">Emisor</a>
+      </div>
+      <div class="controls" style="gap:10px">
+          <input id="wsUrlInput" type="text" placeholder="ws://SERVER:8080 (opcional)" style="padding:.25rem;border-radius:6px;width:220px;border:1px solid rgba(255,255,255,0.06)" />
+          <button id="connectBtn">Conectar</button>
+        <button id="clear" class="btn-clear">Limpiar</button>
+        <button id="voiceToggle">Voz: On</button>
+        <button id="fullscreenBtn">Pantalla completa</button>
+        <label style="color:var(--muted); font-size:13px">Vel:</label>
+        <input id="rate" type="range" min="0.6" max="1.6" step="0.1" value="1" style="width:120px" />
+        <label style="color:var(--muted); font-size:13px">Vol:</label>
+        <input id="volume" type="range" min="0" max="1" step="0.1" value="1" style="width:120px" />
+        <select id="voiceSelect" style="background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.03);padding:4px 8px;border-radius:6px">
+          <option value="default">Predeterminada</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="billboard" class="billboard"><span>Esperando mensaje...</span></div>
+  </div>
+
+  <script>
+  let channel = null;
+  let ws = null;
+  let wsReady = false;
+  let wsUrl = '';
+  let reconnectAttempts = 0;
+  let reconnectTimer = null;
+  const maxReconnectDelay = 30000;
+  const billboard = document.getElementById('billboard');
+  const connectBtn = document.getElementById('connectBtn');
+  const clearBtn = document.getElementById('clear');
+  const voiceToggle = document.getElementById('voiceToggle');
+  const rateInput = document.getElementById('rate');
+  const volumeInput = document.getElementById('volume');
+  const voiceSelect = document.getElementById('voiceSelect');
+
+  // Speech synthesis state (activada por defecto)
+  let voiceOn = true;
+  let synth = window.speechSynthesis;
+  let utter = null;
+  let voices = [];
+
+    function init() {
+      try {
+        channel = new BroadcastChannel('auri_lekto_channel');
+        // Intentar conectar WebSocket si se proporcionó URL
+        const urlEl = document.getElementById('wsUrlInput');
+        const url = urlEl && urlEl.value.trim();
+        if(url){ wsUrl = url; connectWS(); }
+        // estado visual muy simple
+        connectBtn.disabled = true;
+        console.log('Receptor: canal iniciado');
+
+        channel.onmessage = (ev) => {
+          console.log('Receptor recibió:', ev.data);
+          const data = ev.data;
+
+          if (data && data.type === 'message') {
+            // mostrar como letrero grande
+            showBillboard(data.content);
+            // leer en voz alta si está activada
+            if (voiceOn) speakText(data.content);
+            // enviar ack breve
+            channel.postMessage({ type: 'ack', id: data.id, receivedAt: new Date().toISOString() });
+          } else if (data && data.type === 'ping') {
+            showBillboard('PING');
+            channel.postMessage({ type: 'pong', timestamp: new Date().toISOString() });
+          } else if (data && data.type === 'pong') {
+            // mostrar feedback discreto
+            showBillboard('PONG');
+          } else {
+            showBillboard(typeof data === 'string' ? data : JSON.stringify(data));
+          }
+        };
+      } catch (err) {
+        console.error('No se pudo crear BroadcastChannel:', err);
+        statusEl.textContent = '🔴 Error al conectar canal';
+      }
+    }
+
+    connectBtn.addEventListener('click', init);
+    clearBtn.addEventListener('click', () => showBillboard('Esperando mensaje...'));
+
+    // Mostrar texto grande en el letrero con animación
+    function showBillboard(text) {
+      // crear inner con span
+      const inner = document.createElement('div');
+      inner.className = 'inner';
+      const span = document.createElement('span');
+      span.textContent = text || '';
+      inner.appendChild(span);
+
+      // limpiar billboard
+      billboard.innerHTML = '';
+      billboard.appendChild(inner);
+
+      // Forzar reflow y animación flash
+      billboard.classList.remove('flash');
+      void billboard.offsetWidth;
+      billboard.classList.add('flash');
+
+      // medir overflow: si el ancho del texto es mayor que el contenedor, aplicar marquee
+      requestAnimationFrame(() => {
+        const containerW = billboard.clientWidth;
+        const textW = inner.scrollWidth;
+        if (textW > containerW) {
+          // duración proporcional (más largo -> más tiempo)
+          const pxToMove = textW + containerW;
+          const baseSpeed = 350; // px por segundo (aumentado para desplazamiento más rápido)
+          const duration = Math.max(6, pxToMove / baseSpeed); // mínimo 6s
+          inner.style.animation = `marquee ${duration}s linear infinite`;
+          inner.classList.add('marquee');
+        } else {
+          inner.style.animation = '';
+          inner.classList.remove('marquee');
+        }
+      });
+    }
+
+    function speakText(text){
+      if (!synth) return;
+      // cancelar anterior
+      synth.cancel();
+      utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'es-ES';
+      utter.rate = parseFloat(rateInput.value) || 1;
+      utter.volume = parseFloat(volumeInput.value) || 1;
+      // seleccionar voz si se eligió
+      const sel = voiceSelect.value;
+      if (sel && sel !== 'default'){
+        const v = voices.find(vv => vv.name === sel);
+        if (v) utter.voice = v;
+      }
+      // voice selection opcional: dejamos predeterminada
+      synth.speak(utter);
+    }
+
+    // --- WebSocket client support with auto-reconnect ---
+    function connectWS(){
+      if(!wsUrl) return;
+      if(ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+      try{
+        console.log('Receptor: intentando conectar WS a', wsUrl);
+        ws = new WebSocket(wsUrl);
+        ws.onopen = () => {
+          reconnectAttempts = 0;
+          wsReady = true;
+          connectBtn.textContent = 'Conectado WS';
+          console.log('Receptor: WS conectado a', wsUrl);
+        };
+        ws.onmessage = (ev) => {
+          try{
+            const data = JSON.parse(ev.data);
+            console.log('WS recibido', data);
+            if(data.type === 'message'){
+              showBillboard(data.content);
+              if(voiceOn) speakText(data.content);
+            }
+          }catch(err){ console.error('WS parse error', err); }
+        };
+        ws.onerror = (e) => { console.error('WS error', e); };
+        ws.onclose = () => { wsReady = false; connectBtn.textContent = 'Conectar'; scheduleReconnect(); };
+      }catch(err){ console.error('Error iniciando WS', err); scheduleReconnect(); }
+    }
+
+    function scheduleReconnect(){
+      if(reconnectTimer) return;
+      reconnectAttempts++;
+      const base = Math.min(maxReconnectDelay, 1000 * Math.pow(2, reconnectAttempts));
+      const jitter = Math.floor(Math.random() * 1000);
+      const delay = Math.min(maxReconnectDelay, base + jitter);
+      console.log(`Receptor: reconexión en ${delay}ms (intento ${reconnectAttempts})`);
+      reconnectTimer = setTimeout(() => { reconnectTimer = null; connectWS(); }, delay);
+    }
+
+    const wsUrlInput = document.getElementById('wsUrlInput');
+    if(wsUrlInput){
+      wsUrlInput.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); wsUrl = wsUrlInput.value.trim(); if(wsUrl) connectWS(); } });
+    }
+
+    voiceToggle.addEventListener('click', () => {
+      voiceOn = !voiceOn;
+      voiceToggle.textContent = 'Voz: ' + (voiceOn ? 'On' : 'Off');
+      if (!voiceOn) synth.cancel();
+    });
+
+    // Pantalla completa
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    fullscreenBtn.addEventListener('click', () => {
+      const el = document.documentElement;
+      if (!document.fullscreenElement) {
+        el.requestFullscreen?.();
+      } else {
+        document.exitFullscreen?.();
+      }
+    });
+
+    // Cargar voces disponibles
+    function populateVoices(){
+      voices = synth.getVoices() || [];
+      voiceSelect.innerHTML = '<option value="default">Predeterminada</option>';
+      voices.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.name;
+        opt.textContent = v.name + ' (' + v.lang + ')';
+        voiceSelect.appendChild(opt);
+      });
+    }
+    populateVoices();
+    if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = populateVoices;
+
+    // actualiza parámetros mientras se habla
+    rateInput.addEventListener('input', () => { if (utter) utter.rate = parseFloat(rateInput.value); });
+    volumeInput.addEventListener('input', () => { if (utter) utter.volume = parseFloat(volumeInput.value); });
+
+    // Auto-conectar al cargar
+    window.addEventListener('load', () => setTimeout(init, 300));
+  </script>
+</body>
+</html>

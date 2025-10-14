@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
+  <title>Auri Lekto - Emisor</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      /* paleta: azules claros/oscuro con toque morado oscuro */
+      background: linear-gradient(135deg, #0f3460 0%, #082145 60%, #0b2540 100%);
+      min-height: 100vh;
+    }
+    header {
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      padding: 1.5rem 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .main-title {
+      color: white;
+      font-size: 2.6rem;
+      font-weight: 700;
+      text-align: center;
+      text-shadow: 0 8px 30px rgba(99,102,241,0.25), 0 0 18px rgba(124,58,237,0.12);
+    }
+    .main-title span {
+      color: #ffd700;
+      text-shadow: 0 6px 28px rgba(255,215,0,0.12);
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+    nav a:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      scroll-margin-top: 100px;
+    }
+    h2 {
+      color: #2169ac; /* azul claro */
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+    }
+    .desc {
+      color: #555;
+      font-size: 1.2rem;
+      text-align: center;
+      font-style: italic;
+    }
+    .message-bank {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .message-bank button {
+      background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); /* azul profundo -> azul */
+      color: white;
+      border: none;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 6px 20px rgba(14, 60, 120, 0.28);
+    }
+    .message-bank button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    .pantalla-mensajes {
+      background: linear-gradient(180deg,#04122b,#071633); /* panel azul oscuro con degradado */
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      min-height: 200px;
+      box-shadow: 0 10px 40px rgba(2,18,44,0.55);
+    }
+    .pantalla-titulo {
+      color: #a5b8ff; /* azul muy claro */
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #hora-local {
+      color: #c7dcff;
+      font-size: 1.1rem;
+    }
+    #listaMensajes {
+      list-style: none;
+      min-height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #listaMensajes li {
+      color: #e6f0ff;
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+    .custom-message-box {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 2rem 0;
+    }
+    .custom-message-box input {
+      flex: 1;
+      min-width: 250px;
+      padding: 0.8rem;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .custom-message-box select {
+      padding: 0.8rem;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      cursor: pointer;
+    }
+    .custom-message-box button {
+      background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+      color: white;
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 6px 18px rgba(30, 64, 175, 0.22);
+    }
+    .custom-message-box button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
+    }
+    .connection-status {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: linear-gradient(90deg,#233e8b,#3b82f6); /* azul oscuro -> azul */
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 6px 18px rgba(15,40,90,0.35);
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(90deg,#1e40af,#2563eb);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 6px 22px rgba(13,27,66,0.45);
+      animation: slideIn 0.3s ease-out;
+      z-index: 999;
+    }
+    footer {
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      color: white;
+      text-align: center;
+      padding: 1.5rem;
+      margin-top: 2rem;
+    }
+    .test-section {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+    .test-section h3 {
+      color: #856404;
+      margin-bottom: 0.5rem;
+    }
+    .test-section button {
+      background: #ffc107;
+      color: #000;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    #connectionStatus {
+      margin-top: 0.5rem;
+      font-weight: 600;
+    }
+    /* Estilos para sección Equipo */
+    .team{ display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-top:1rem }
+  .member{ background: linear-gradient(135deg,#fff,#f7f7f9); padding:1rem; border-radius:8px; cursor:pointer; box-shadow: 0 6px 18px rgba(0,0,0,0.08); transition: transform .18s, box-shadow .18s, border .18s }
+    .member h3{ color:#333; font-size:1.05rem; margin-bottom:4px }
+    .member p{ color:#666; font-size:0.9rem }
+  .member:hover{ transform: translateY(-6px); box-shadow: 0 12px 30px rgba(0,0,0,0.12) }
+  /* Tarjeta seleccionada */
+  .member.selected{ border: 2px solid #ffd700; box-shadow: 0 18px 40px rgba(255,215,0,0.12); transform: translateY(-8px); background: linear-gradient(135deg,#fffdf5,#fff8e6) }
+
+    /* Modal simple */
+    .modal-backdrop{ position:fixed; inset:0; background: rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:9999 }
+    .modal{ background:white; padding:1.5rem; border-radius:10px; max-width:560px; width:90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3) }
+    .modal h3{ margin-bottom:8px }
+    .modal p{ color:#444 }
+    .modal .close{ margin-top:12px; background:#f1f1f1; border:none; padding:8px 12px; border-radius:6px; cursor:pointer }
+  </style>
+</head>
+<body>
+    <header>
+      <h1 class="main-title">Auri <span>Lekto</span> - Emisor</h1>
+      <nav>
+        <a href="#inicio">Inicio</a>
+        <a href="#mensajes">Mensajes</a>
+        <a href="#equipo">Equipo</a>
+        <a href="page2.html">Receptor</a>
+      </nav>
+    </header>
+    <main>
+      <section id="inicio" class="section">
+        <h2>Bienvenido</h2>
+        <p class="desc">"Dale vida a tus mensajes transformándolos en experiencia".</p>
+      </section>
+      <section id="mensajes" class="section">
+        <h2>📤 Enviar Mensajes</h2>
+        
+        <!-- Sección de prueba -->
+        <div class="test-section">
+          <h3>🔧 Panel de Prueba</h3>
+          <button onclick="testConnection()">Probar Conexión (BroadcastChannel)</button>
+          <button onclick="sendTestMessage()">Enviar Mensaje de Prueba</button>
+          <div style="margin-top:.75rem; display:flex; gap:.5rem; align-items:center">
+            <input id="wsUrlInput" type="text" placeholder="ws://SERVER:8080 (opcional)" style="padding:.4rem; border-radius:6px; width:300px; border:1px solid rgba(255,255,255,0.08)" />
+            <button onclick="initWSFromInput()">Conectar WS</button>
+          </div>
+          <div id="connectionStatus"></div>
+        </div>
+
+        <h3 style="margin-top: 2rem;">Mensajes predeterminados</h3>
+        <div class="message-bank minimal">
+          <button type="button" onclick="autocompletarMensaje('Tiempo de Oracion')">Tiempo de Oracion😇</button>
+          <button type="button" onclick="autocompletarMensaje('Horario Especial')">Horario Especial🕗</button>
+          <button type="button" onclick="autocompletarMensaje('Jornada De Examenes')">Jornada De Examenes📝</button>
+          <button type="button" onclick="autocompletarMensaje('Bienvenidos')">Bienvenidos👋</button>
+          <button type="button" onclick="autocompletarMensaje('Descanso')">Descanso😌</button>
+        </div>
+
+        <div class="pantalla-mensajes">
+          <div class="pantalla-titulo">
+            <span>📺 Vista previa</span>
+            <span id="hora-local"></span>
+          </div>
+          <ul id="listaMensajes"></ul>
+        </div>
+
+        <form class="custom-message-box" onsubmit="enviarMensajePersonalizado(event)">
+          <input type="text" id="mensajePersonalizado" placeholder="Escribe tu mensaje..." maxlength="100" required />
+          <select id="tiempoMensaje">
+            <option value="60">1 min</option>
+            <option value="120">2 min</option>
+            <option value="180">3 min</option>
+            <option value="300">5 min</option>
+            <option value="0">Permanente</option>
+          </select>
+          <button type="submit">🚀 Enviar al Receptor</button>
+        </form>
+        
+        <!-- Sección Equipo añadida -->
+  <section id="equipo" class="section">
+  <h2>Equipo</h2>
+  <div id="funcionSeleccionada" style="margin-bottom:12px;color:#444;font-weight:700" aria-live="polite"></div>
+  <div class="team">
+            <div class="member" onclick="mostrarModalMiembro(this, 'Jenifer Perafan', 'Directora de Mercadeo', 'Encargada de la estrategia de marketing, promoción y comunicación de la empresa.')">
+                <h3>Jennifer Perafan</h3>
+                <p>Directora de Mercadeo</p>
+            </div>
+          <div class="member" onclick="mostrarModalMiembro(this, 'Kaory Parra', 'Jefa de Producción', 'Supervisa y coordina los procesos de producción para asegurar la calidad y eficiencia.')">
+            <h3>Kaory Parra</h3>
+            <p>Jefa de Producción</p>
+          </div>
+          <div class="member" onclick="mostrarModalMiembro(this, 'Valeria Ossa', 'Dra. De Recursos Humanos', 'Gestiona el talento humano, bienestar y desarrollo profesional del equipo.')">
+              <h3>Valeria Ossa</h3>
+              <p>Dra. De Recursos Humanos</p>
+          </div>
+          <div class="member" onclick="mostrarModalMiembro(this, 'Isaac Galeano', 'Técnico de Producción', 'Apoya en la operación técnica y mantenimiento de los equipos de producción.')">
+              <h3>Isaac Galeano</h3>
+              <p>Técnico de Producción</p>
+          </div>
+          <div class="member" onclick="mostrarModalMiembro(this, 'Hellen Sanchez', 'Jefe de Finanzas', 'Administra los recursos financieros, presupuestos y reportes económicos.')">
+              <h3>Hellen Sanchez</h3>
+              <p>Jefe de Finanzas</p>
+            </div>
+            <div class="member" onclick="mostrarModalMiembro(this, 'Joan Tamayo', 'Asesor Comercial', 'Responsable de la relación con clientes y asesoría en ventas.')">
+                <h3>Joan Tamayo</h3>
+                <p>Asesor Comercial</p>
+            </div>
+            <div class="member" onclick="mostrarModalMiembro(this, 'Nicole Daza', 'Gerente General', 'Responsable de la dirección y gestión general del equipo. Lidera la toma de decisiones estratégicas y representa a la empresa.')">
+              <h3>Nicole Daza</h3>
+              <p>Gerente General</p>
+            </div>
+    </div>
+      </section>
+      </section>
+    </main>
+
+    <div class="connection-status" id="statusIndicator">
+      🔴 Esperando conexión...
+    </div>
+
+    <footer>
+      <span>© 2025 Auri Lekto. Sistema de Mensajería</span>
+    </footer>
+    
+    <script>
+      let lastSelectedMember = null;
+      function mostrarModalMiembro(elOrName, nameOrRole, roleOrDesc, maybeDesc){
+        // soporta llamada con (element, name, role, desc) o (name, role, desc)
+        let el = null;
+        let name, role, desc;
+        if(typeof elOrName === 'object' && elOrName !== null && elOrName.classList){
+          el = elOrName;
+          name = nameOrRole;
+          role = roleOrDesc;
+          desc = maybeDesc;
+        } else {
+          name = elOrName;
+          role = nameOrRole;
+          desc = roleOrDesc;
+        }
+
+        // gestionar selección visual
+        if(lastSelectedMember && lastSelectedMember !== el){
+          lastSelectedMember.classList.remove('selected');
+        }
+        if(el){
+          el.classList.add('selected');
+          lastSelectedMember = el;
+        }
+
+        // mostrar en modal
+        document.getElementById('modalName').textContent = name;
+        document.getElementById('modalRole').textContent = role;
+        document.getElementById('modalDesc').textContent = desc;
+        const mb = document.getElementById('modalBackdrop');
+        mb.style.display = 'flex';
+        // además mostrar la función en la sección Equipo
+        const funcDiv = document.getElementById('funcionSeleccionada');
+        if(funcDiv) funcDiv.textContent = 'Función: ' + role;
+      }
+      function ocultarModal(){
+        document.getElementById('modalBackdrop').style.display = 'none';
+        const funcDiv = document.getElementById('funcionSeleccionada');
+        if(funcDiv) funcDiv.textContent = '';
+        if(lastSelectedMember){
+          lastSelectedMember.classList.remove('selected');
+          lastSelectedMember = null;
+        }
+      }
+      // Variables globales
+      let messageChannel = null;
+      let isChannelReady = false;
+      let mensajesSent = 0;
+
+      // Inicializar BroadcastChannel
+      function initChannel() {
+        try {
+          messageChannel = new BroadcastChannel('auri_lekto_channel');
+          isChannelReady = true;
+          
+          document.getElementById('statusIndicator').innerHTML = '🟢 Conectado al Receptor';
+          document.getElementById('statusIndicator').style.background = '#28a745';
+          
+          console.log('✅ Canal de mensajes iniciado correctamente');
+          showStatus('Canal iniciado correctamente', 'success');
+          
+          // Listener para respuestas
+          messageChannel.onmessage = (event) => {
+            console.log('Respuesta recibida:', event.data);
+            if (event.data.type === 'pong') {
+              showStatus('Receptor está conectado y respondiendo', 'success');
+            }
+          };
+          
+        } catch (error) {
+          console.error('Error al crear canal:', error);
+          showStatus('Error: ' + error.message, 'error');
+          document.getElementById('statusIndicator').innerHTML = '🔴 Error de conexión';
+          document.getElementById('statusIndicator').style.background = '#dc3545';
+        }
+      }
+
+      // Probar conexión
+      function testConnection() {
+        if (!isChannelReady) {
+          showStatus('Iniciando canal...', 'info');
+          initChannel();
+          return;
+        }
+        
+        try {
+          messageChannel.postMessage({ type: 'ping', timestamp: new Date().toISOString() });
+          showStatus('Señal de prueba enviada. Revisa el receptor.', 'info');
+          console.log('Ping enviado');
+        } catch (error) {
+          showStatus('Error al enviar: ' + error.message, 'error');
+          console.error('Error:', error);
+        }
+      }
+
+      // Enviar mensaje de prueba
+      function sendTestMessage() {
+        enviarAlReceptor('🧪 Mensaje de prueba - ' + new Date().toLocaleTimeString());
+      }
+
+      // Enviar mensaje al receptor
+      function enviarAlReceptor(contenido) {
+        if (!isChannelReady) {
+          showStatus('Iniciando canal primero...', 'warning');
+          initChannel();
+          setTimeout(() => enviarAlReceptor(contenido), 500);
+          return;
+        }
+        
+        try {
+          const ahora = new Date();
+          const timestamp = ahora.toLocaleTimeString('es-ES', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+          });
+          
+          const mensaje = {
+            type: 'message',
+            sender: 'Auri Lekto',
+            content: contenido,
+            timestamp: timestamp,
+            id: Date.now()
+          };
+          
+          console.log('Enviando mensaje:', mensaje);
+          // Si hay una conexión WebSocket activa, enviar por WS (cross-device).
+          if (wsReady && ws && ws.readyState === WebSocket.OPEN) {
+            try {
+              ws.send(JSON.stringify(mensaje));
+              console.log('Enviado vía WS');
+            } catch (err) {
+              console.warn('Fallo al enviar por WS, usando BroadcastChannel', err);
+              if (messageChannel) messageChannel.postMessage(mensaje);
+            }
+          } else {
+            // Fallback: usar BroadcastChannel para comunicaciones locales
+            if (messageChannel) messageChannel.postMessage(mensaje);
+          }
+          
+          mensajesSent++;
+          mostrarNotificacion(`✓ Mensaje #${mensajesSent} enviado al receptor`);
+          showStatus(`Mensaje enviado exitosamente (#${mensajesSent})`, 'success');
+          
+        } catch (error) {
+          console.error('Error al enviar:', error);
+          showStatus('Error al enviar: ' + error.message, 'error');
+        }
+      }
+
+      // Mostrar estado en el panel de prueba
+      function showStatus(message, type) {
+        const statusDiv = document.getElementById('connectionStatus');
+        const colors = {
+          success: '#28a745',
+          error: '#dc3545',
+          warning: '#ffc107',
+          info: '#17a2b8'
+        };
+        statusDiv.textContent = message;
+        statusDiv.style.color = colors[type] || '#000';
+      }
+
+      // Notificación flotante
+      function mostrarNotificacion(texto) {
+        const notif = document.createElement('div');
+        notif.className = 'notification';
+        notif.textContent = texto;
+        document.body.appendChild(notif);
+        
+        setTimeout(() => {
+          notif.style.opacity = '0';
+          notif.style.transition = 'opacity 0.3s';
+          setTimeout(() => notif.remove(), 300);
+        }, 3000);
+      }
+
+      // Autocompletar mensaje
+      function autocompletarMensaje(texto) {
+        document.getElementById('mensajePersonalizado').value = texto;
+        document.getElementById('mensajePersonalizado').focus();
+      }
+
+      // Enviar mensaje personalizado
+      function enviarMensajePersonalizado(event) {
+        event.preventDefault();
+        const input = document.getElementById('mensajePersonalizado');
+        const texto = input.value.trim();
+        
+        if (texto) {
+          mostrarEnPantalla(texto);
+          enviarAlReceptor(texto);
+          input.value = '';
+        }
+      }
+
+      // Mostrar en pantalla local
+      function mostrarEnPantalla(texto) {
+        const lista = document.getElementById('listaMensajes');
+        lista.innerHTML = '';
+        if (texto) {
+          const li = document.createElement('li');
+          li.textContent = texto;
+          lista.appendChild(li);
+        }
+      }
+
+      // Actualizar hora
+      function actualizarHoraLocal() {
+        const divHora = document.getElementById('hora-local');
+        if (divHora) {
+          const ahora = new Date();
+          const hora = ahora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          divHora.textContent = hora;
+        }
+      }
+      setInterval(actualizarHoraLocal, 1000);
+      actualizarHoraLocal();
+
+      // Iniciar canal al cargar
+      window.addEventListener('load', () => {
+        console.log('Página cargada, iniciando canal...');
+        setTimeout(initChannel, 500);
+        // auto-conectar WS si hay URL en el input
+        setTimeout(() => {
+          const maybe = document.getElementById('wsUrlInput');
+          if(maybe && maybe.value.trim()){
+            wsUrl = maybe.value.trim();
+            connectWS();
+          }
+        }, 700);
+      });
+
+      // --- WebSocket support with auto-reconnect/backoff ---
+      let ws = null;
+      let wsReady = false;
+      let wsUrl = '';
+      let reconnectAttempts = 0;
+      let reconnectTimer = null;
+      const maxReconnectDelay = 30000; // 30s
+
+      function initWSFromInput(){
+        const url = document.getElementById('wsUrlInput').value.trim();
+        if(!url) return alert('Introduce la URL del servidor WebSocket (p. ej. ws://192.168.1.10:8080)');
+        wsUrl = url;
+        connectWS();
+      }
+
+      function connectWS(){
+        if(!wsUrl) return;
+        // si ya hay una conexión en progreso/abierta, no hacemos nada
+        if(ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+
+        try{
+          console.log('Intentando conectar WS a', wsUrl);
+          showStatus('Intentando conectar WS...', 'info');
+          ws = new WebSocket(wsUrl);
+
+          ws.onopen = () => {
+            reconnectAttempts = 0;
+            wsReady = true;
+            console.log('WS conectado a', wsUrl);
+            mostrarNotificacion('WS conectado');
+            showStatus('WS conectado', 'success');
+            // actualizar indicador global
+            document.getElementById('statusIndicator').innerHTML = '🟢 Conectado al Receptor (WS)';
+            document.getElementById('statusIndicator').style.background = '#28a745';
+          };
+
+          ws.onmessage = (ev) => {
+            try{
+              const data = JSON.parse(ev.data);
+              console.log('WS recibido', data);
+              if(data.type === 'message'){
+                mostrarEnPantalla(data.content);
+              }
+            }catch(err){ console.error('WS parse error', err); }
+          };
+
+          ws.onerror = (e) => { console.error('WS error', e); mostrarNotificacion('Error WS'); };
+
+          ws.onclose = (ev) => {
+            wsReady = false;
+            console.log('WS cerrado', ev);
+            mostrarNotificacion('WS desconectado');
+            showStatus('WS desconectado', 'warning');
+            document.getElementById('statusIndicator').innerHTML = '🔴 WS desconectado';
+            document.getElementById('statusIndicator').style.background = '#ffc107';
+            scheduleReconnect();
+          };
+
+        }catch(err){ console.error('Error iniciando WS', err); mostrarNotificacion('Error al conectar WS'); scheduleReconnect(); }
+      }
+
+      function scheduleReconnect(){
+        if(reconnectTimer) return; // ya programado
+        reconnectAttempts++;
+        // exponencial con jitter
+        const base = Math.min(maxReconnectDelay, 1000 * Math.pow(2, reconnectAttempts));
+        const jitter = Math.floor(Math.random() * 1000);
+        const delay = Math.min(maxReconnectDelay, base + jitter);
+        console.log(`Reconexión en ${delay}ms (intento ${reconnectAttempts})`);
+        reconnectTimer = setTimeout(() => {
+          reconnectTimer = null;
+          connectWS();
+        }, delay);
+      }
+
+      function stopReconnect(){ if(reconnectTimer){ clearTimeout(reconnectTimer); reconnectTimer = null; reconnectAttempts = 0; } }
+
+      // Auto-conectar si hay una URL en el input al cargar
+
+      // Scroll suave
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('nav a[href^="#"]').forEach(function(enlace) {
+          enlace.addEventListener('click', function(e) {
+            const destino = document.querySelector(this.getAttribute('href'));
+            if (destino) {
+              e.preventDefault();
+              destino.scrollIntoView({ behavior: 'smooth' });
+            }
+          });
+        });
+      });
+    </script>
+    <!-- Modal para mostrar miembro -->
+    <div id="modalBackdrop" class="modal-backdrop" onclick="ocultarModal()" style="display:none">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3 id="modalName">Nombre</h3>
+        <h4 id="modalRole" style="color:#666;margin-top:4px">Cargo</h4>
+        <p id="modalDesc" style="margin-top:8px">Descripción</p>
+        <div style="text-align:right"><button class="close" onclick="ocultarModal()">Cerrar</button></div>
+      </div>
+    </div>
+</body>
+</html>
