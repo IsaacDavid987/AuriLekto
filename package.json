@@ -2,9 +2,9 @@
   "name": "auri-lekto-ws",
   "version": "1.0.0",
   "description": "Servidor WebSocket simple para Auri Lekto",
-  "main": "ws-server.js",
+  "main": "Script/ws-server.js",
   "scripts": {
-    "start": "node ws-server.js 8080"
+    "start": "node Script/ws-server.js 8080"
   },
   "dependencies": {
     "ws": "^8.12.0"

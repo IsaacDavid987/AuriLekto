@@ -53,7 +53,7 @@ let channel = null;
         };
       } catch (err) {
         console.error('No se pudo crear BroadcastChannel:', err);
-        statusEl.textContent = '🔴 Error al conectar canal';
+          showBillboard('🔴 Error al conectar canal');
       }
     }
 

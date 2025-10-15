@@ -2,8 +2,8 @@
 
 Este pequeño proyecto contiene dos páginas:
 
-- `index.html` - Emisor
-- `page2.html` - Receptor
+ - `Indexs/Main.html` - Emisor
+ - `Indexs/Recept.html` - Receptor
 
 Objetivo: demostrar comunicación entre dos páginas abiertas en el mismo navegador (BroadcastChannel) y entre máquinas distintas usando un servidor WebSocket relay incluido.
 
@@ -22,10 +22,10 @@ python -m http.server 8000
 
 3. Abrir dos pestañas:
 
-- http://localhost:8000/index.html
-- http://localhost:8000/page2.html
+- http://localhost:8000/Indexs/Main.html
+- http://localhost:8000/Indexs/Recept.html
 
-4. Usa el panel de prueba en `index.html` para enviar mensajes — deberían aparecer en el receptor.
+4. Usa el panel de prueba en `Indexs/Main.html` para enviar mensajes — deberían aparecer en el receptor.
 
 Comunicación entre dispositivos con WebSocket
 
@@ -38,22 +38,23 @@ npm install
 2. Inicia el servidor WebSocket (ejemplo puerto 8080):
 
 ```powershell
+npm install
 npm start
 # o
-node ws-server.js 8080
+node Script/ws-server.js 8080
 ```
 
 3. Averigua la IP de la máquina donde corre el servidor (por ejemplo `192.168.1.10`) y asegúrate de que el puerto esté accesible en la red.
 
 4. Sirve los archivos estáticos (como en la sección anterior) en las máquinas clientes si es necesario.
 
-5. En ambas páginas (`index.html` y `page2.html`) introduce en el campo de conexión WS la URL del servidor, por ejemplo:
+5. En ambas páginas (`Main.html` y `Recept.html`) introduce en el campo de conexión WS la URL del servidor, por ejemplo:
 
 ```
 ws://192.168.1.10:8080
 ```
 
-6. Pulsa "Conectar" en ambas páginas (o presiona Enter en el input). Ahora los mensajes enviados desde `index.html` llegarán a `page2.html` a través del servidor WebSocket.
+6. Pulsa "Conectar" en ambas páginas (o presiona Enter en el input). Ahora los mensajes enviados desde `Main.html` llegarán a `Recept.html` a través del servidor WebSocket.
 
 Notas y seguridad
 - El servidor `ws-server.js` es un relay simple que reenvía cualquier mensaje JSON que reciba a todos los clientes conectados. No implementa autenticación ni control de acceso.
@@ -69,8 +70,8 @@ Si quieres que implemente cifrado (WSS), autenticación simple, o intercambio se
 
 Este pequeño proyecto contiene dos páginas:
 
-- `index.html` - Emisor
-- `page2.html` - Receptor
+ - `Indexs/Main.html` - Emisor
+ - `Indexs/Recept.html` - Receptor
 
 Objetivo: demostrar comunicación entre dos páginas abiertas en el mismo navegador mediante BroadcastChannel.
 
@@ -84,10 +85,10 @@ python -m http.server 8000
 ```
 
 3. Abrir dos pestañas en tu navegador:
-- http://localhost:8000/index.html
-- http://localhost:8000/page2.html
+- http://localhost:8000/Indexs/Main.html
+- http://localhost:8000/Indexs/Recept.html
 
-4. En el emisor (`index.html`) usa "Probar Conexión" o "Enviar Mensaje de Prueba". Verás los mensajes en el receptor y recibirás respuestas (pong/ack).
+4. En el emisor (`Main.html`) usa "Probar Conexión" o "Enviar Mensaje de Prueba". Verás los mensajes en el receptor y recibirás respuestas (pong/ack).
 
 Notas:
 - BroadcastChannel solo funciona entre contextos (pestañas/iframes) del mismo origen (misma URL/protocolo/puerto).
