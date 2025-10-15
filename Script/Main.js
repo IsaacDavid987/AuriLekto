@@ -322,3 +322,117 @@ destino.scrollIntoView({ behavior: 'smooth' });
 });
 });
 });
+
+// Centralizar listeners para Main.html (evitar handlers inline)
+function registerMainListeners(){
+	const testBtn = document.getElementById('testConnectionBtn');
+	const sendBtn = document.getElementById('sendTestBtn');
+	const connectWSBtn = document.getElementById('connectWSFromInputBtn');
+	const autofillBtns = document.querySelectorAll('.autofill-btn');
+	const form = document.getElementById('customMessageForm');
+	const modalClose = document.querySelector('#modalBackdrop .close');
+
+	if(testBtn) testBtn.addEventListener('click', testConnection);
+	if(sendBtn) sendBtn.addEventListener('click', sendTestMessage);
+	if(connectWSBtn) connectWSBtn.addEventListener('click', initWSFromInput);
+  
+		// Control Center: registro simple
+		const controlLog = document.getElementById('controlLog');
+		const preset = document.getElementById('presetSelect');
+		function pushLog(msg){
+			if(!controlLog) return;
+			const li = document.createElement('li');
+			li.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+			controlLog.prepend(li);
+		}
+		if(testBtn) testBtn.addEventListener('click', () => pushLog('Ping enviado (BroadcastChannel)'));
+		if(sendBtn) sendBtn.addEventListener('click', () => pushLog('Mensaje enviado desde Control Center'));
+		if(preset){ preset.addEventListener('change', (e) => { const v = e.target.value; if(v && v !== 'default'){ document.getElementById('mensajePersonalizado').value = v; pushLog('Preset seleccionado: ' + v); } }); }
+
+		// Navbar filter
+		document.querySelectorAll('.main-nav .nav-item[data-filter]').forEach(nav => {
+			nav.addEventListener('click', (e) => {
+				e.preventDefault();
+				const filter = nav.getAttribute('data-filter');
+				document.querySelectorAll('.main-nav .nav-item').forEach(n => n.classList.remove('active'));
+				nav.classList.add('active');
+				applyFilter(filter);
+				// scroll to target section if exists
+				const target = document.querySelector(nav.getAttribute('href'));
+				if(target) target.scrollIntoView({behavior: 'smooth'});
+			});
+		});
+
+	autofillBtns.forEach(b => {
+		b.addEventListener('click', (e) => {
+			const text = e.currentTarget.getAttribute('data-autofill');
+			if(text) autocompletarMensaje(text);
+		});
+	});
+
+	if(form) form.addEventListener('submit', enviarMensajePersonalizado);
+
+	if(modalClose) modalClose.addEventListener('click', ocultarModal);
+		// miembros del equipo: usar data-attributes para abrir modal
+		document.querySelectorAll('.member').forEach(member => {
+			member.addEventListener('click', (e) => {
+				const name = member.getAttribute('data-name') || member.querySelector('h3')?.textContent;
+				const role = member.getAttribute('data-role') || member.querySelector('p')?.textContent;
+				const desc = member.getAttribute('data-desc') || '';
+				mostrarModalMiembro(member, name, role, desc);
+			});
+		});
+
+		// backdrop: cerrar al hacer click fuera del modal
+		const backdrop = document.getElementById('modalBackdrop');
+		if(backdrop){
+			backdrop.addEventListener('click', (e) => {
+				if(e.target === backdrop) ocultarModal();
+			});
+		}
+}
+
+// Aplica filtro simple mostrando/ocultando secciones
+function applyFilter(filter){
+	const allSections = document.querySelectorAll('main .section');
+	if(filter === 'all' || !filter){
+		allSections.forEach(s => s.style.display = 'block');
+		return;
+	}
+	allSections.forEach(s => {
+		if(s.id === filter) s.style.display = 'block'; else s.style.display = 'none';
+	});
+}
+
+// Registrar al cargar la página
+window.addEventListener('load', () => {
+	// Solo registrar si estamos en la página que contiene esos elementos
+	if(document.getElementById('testConnectionBtn') || document.getElementById('customMessageForm')){
+		registerMainListeners();
+	}
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  const images = [
+    "../imagenes/WhatsApp Image 2025-10-15 at 8.03.15 AM (1).jpeg",
+    "../imagenes/WhatsApp Image 2025-10-15 at 8.03.15 AM (2).jpeg",
+    "../imagenes/WhatsApp Image 2025-10-15 at 8.03.15 AM (3).jpeg",
+    "../imagenes/WhatsApp Image 2025-10-15 at 8.03.15 AM (4).jpeg",
+    "../imagenes/WhatsApp Image 2025-10-15 at 8.03.15 AM.jpeg",
+    "../imagenes/WhatsApp Image 2025-10-15 at 8.03.16 AM (1).jpeg",
+    "../imagenes/WhatsApp Image 2025-10-15 at 8.03.16 AM.jpeg"
+  ];
+
+  let currentIndex = 0;
+  const carousel = document.querySelector('#equipo .background-carousel');
+
+  if (carousel) {
+    setInterval(() => {
+      currentIndex = (currentIndex + 1) % images.length;
+      carousel.style.backgroundImage = `url('${images[currentIndex]}')`;
+    }, 5000);
+
+    // Set initial image
+    carousel.style.backgroundImage = `url('${images[0]}')`;
+  }
+});
