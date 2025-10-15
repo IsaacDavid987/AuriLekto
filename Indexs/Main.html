@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
+  <title>Auri Lekto - Emisor</title>
+  <link rel="stylesheet" href="../Style/Main.css" />
+</head>
+<body>
+    <header>
+      <h1 class="main-title">Auri <span>Lekto</span> - Emisor</h1>
+      <nav>
+        <a href="#inicio">Inicio</a>
+        <a href="#mensajes">Mensajes</a>
+        <a href="#equipo">Equipo</a>
+        <a href="page2.html">Receptor</a>
+      </nav>
+    </header>
+    <main>
+      <section id="inicio" class="section">
+        <h2>Bienvenido</h2>
+        <p class="desc">"Dale vida a tus mensajes transformándolos en experiencia".</p>
+      </section>
+      <section id="mensajes" class="section">
+        <h2>📤 Enviar Mensajes</h2>
+        
+        <!-- Sección de prueba -->
+        <div class="test-section">
+          <h3>🔧 Panel de Prueba</h3>
+          <button onclick="testConnection()">Probar Conexión (BroadcastChannel)</button>
+          <button onclick="sendTestMessage()">Enviar Mensaje de Prueba</button>
+          <div style="margin-top:.75rem; display:flex; gap:.5rem; align-items:center">
+            <input id="wsUrlInput" type="text" placeholder="ws://SERVER:8080 (opcional)" style="padding:.4rem; border-radius:6px; width:300px; border:1px solid rgba(255,255,255,0.08)" />
+            <button onclick="initWSFromInput()">Conectar WS</button>
+          </div>
+          <div id="connectionStatus"></div>
+        </div>
+
+        <h3 style="margin-top: 2rem;">Mensajes predeterminados</h3>
+        <div class="message-bank minimal">
+          <button type="button" onclick="autocompletarMensaje('Tiempo de Oracion')">Tiempo de Oracion😇</button>
+          <button type="button" onclick="autocompletarMensaje('Horario Especial')">Horario Especial🕗</button>
+          <button type="button" onclick="autocompletarMensaje('Jornada De Examenes')">Jornada De Examenes📝</button>
+          <button type="button" onclick="autocompletarMensaje('Bienvenidos')">Bienvenidos👋</button>
+          <button type="button" onclick="autocompletarMensaje('Descanso')">Descanso😌</button>
+        </div>
+
+        <div class="pantalla-mensajes">
+          <div class="pantalla-titulo">
+            <span>📺 Vista previa</span>
+            <span id="hora-local"></span>
+          </div>
+          <ul id="listaMensajes"></ul>
+        </div>
+
+        <form class="custom-message-box" onsubmit="enviarMensajePersonalizado(event)">
+          <input type="text" id="mensajePersonalizado" placeholder="Escribe tu mensaje..." maxlength="100" required />
+          <select id="tiempoMensaje">
+            <option value="60">1 min</option>
+            <option value="120">2 min</option>
+            <option value="180">3 min</option>
+            <option value="300">5 min</option>
+            <option value="0">Permanente</option>
+          </select>
+          <button type="submit">🚀 Enviar al Receptor</button>
+        </form>
+        
+        <!-- Sección Equipo añadida -->
+  <section id="equipo" class="section">
+  <h2>Equipo</h2>
+  <div id="funcionSeleccionada" style="margin-bottom:12px;color:#444;font-weight:700" aria-live="polite"></div>
+  <div class="team">
+            <div class="member" onclick="mostrarModalMiembro(this, 'Jenifer Perafan', 'Directora de Mercadeo', 'Encargada de la estrategia de marketing, promoción y comunicación de la empresa.')">
+                <h3>Jennifer Perafan</h3>
+                <p>Directora de Mercadeo</p>
+            </div>
+          <div class="member" onclick="mostrarModalMiembro(this, 'Kaory Parra', 'Jefa de Producción', 'Supervisa y coordina los procesos de producción para asegurar la calidad y eficiencia.')">
+            <h3>Kaory Parra</h3>
+            <p>Jefa de Producción</p>
+          </div>
+          <div class="member" onclick="mostrarModalMiembro(this, 'Valeria Ossa', 'Dra. De Recursos Humanos', 'Gestiona el talento humano, bienestar y desarrollo profesional del equipo.')">
+              <h3>Valeria Ossa</h3>
+              <p>Dra. De Recursos Humanos</p>
+          </div>
+          <div class="member" onclick="mostrarModalMiembro(this, 'Isaac Galeano', 'Técnico de Producción', 'Apoya en la operación técnica y mantenimiento de los equipos de producción.')">
+              <h3>Isaac Galeano</h3>
+              <p>Técnico de Producción</p>
+          </div>
+          <div class="member" onclick="mostrarModalMiembro(this, 'Hellen Sanchez', 'Jefe de Finanzas', 'Administra los recursos financieros, presupuestos y reportes económicos.')">
+              <h3>Hellen Sanchez</h3>
+              <p>Jefe de Finanzas</p>
+            </div>
+            <div class="member" onclick="mostrarModalMiembro(this, 'Joan Tamayo', 'Asesor Comercial', 'Responsable de la relación con clientes y asesoría en ventas.')">
+                <h3>Joan Tamayo</h3>
+                <p>Asesor Comercial</p>
+            </div>
+            <div class="member" onclick="mostrarModalMiembro(this, 'Nicole Daza', 'Gerente General', 'Responsable de la dirección y gestión general del equipo. Lidera la toma de decisiones estratégicas y representa a la empresa.')">
+              <h3>Nicole Daza</h3>
+              <p>Gerente General</p>
+            </div>
+    </div>
+      </section>
+      </section>
+    </main>
+
+    <div class="connection-status" id="statusIndicator">
+      🔴 Esperando conexión...
+    </div>
+
+    <footer>
+      <span>© 2025 Auri Lekto. Sistema de Mensajería</span>
+    </footer>
+    
+    <script src="../Script/Main.js"></script>
+    <!-- Modal para mostrar miembro -->
+    <div id="modalBackdrop" class="modal-backdrop" onclick="ocultarModal()" style="display:none">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h3 id="modalName">Nombre</h3>
+        <h4 id="modalRole" style="color:#666;margin-top:4px">Cargo</h4>
+        <p id="modalDesc" style="margin-top:8px">Descripción</p>
+        <div style="text-align:right"><button class="close" onclick="ocultarModal()">Cerrar</button></div>
+      </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,36 @@
+  :root{
+      --bg: #071044; /* deep navy */
+      --card: #0b1220;
+      --accent: #7c3aed; /* morado */
+      --muted: #93c5fd; /* azul claro */
+    }
+  html,body{height:100%;}
+  body { font-family: Inter, 'Segoe UI', Roboto, Arial, sans-serif; background: linear-gradient(180deg,var(--bg),#081138); margin:0; padding:0; color:#e6eef6; height:100vh }
+  /* El billboard ahora ocupa toda la pantalla */
+  .card { position:fixed; inset:0; display:flex; flex-direction:column; }
+  .topbar{ position: absolute; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:center; padding:12px 20px; background: linear-gradient(90deg, rgba(10,8,36,0.6), rgba(27,10,80,0.5)); backdrop-filter: blur(6px); z-index:40 }
+  .title{ font-weight:700; letter-spacing:0.6px; color:var(--muted) }
+  .link{ color:var(--accent); text-decoration:none; font-weight:700 }
+
+  /* Letrero grande */
+  /* Fondo con patrón sutil usando SVG data URL */
+  .billboard{ background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><g fill="none" stroke="rgba(124,58,237,0.06)" stroke-width="1"><path d="M0 20 L40 20 M20 0 L20 40"/></g></svg>'); background-repeat: repeat; background-size: 40px 40px; border: none; padding: 4rem 1.5rem; border-radius: 0; display:flex; align-items:center; justify-content:center; min-height:100vh; width:100%; text-align:center; overflow:hidden; position:relative }
+  /* dejar espacio superior para la topbar (altura ~64px) */
+  .billboard{ padding-top:calc(4rem + 64px); box-sizing:border-box }
+  /* Escala el texto automáticamente hasta un máximo muy grande (aún mayor para ser muy visible) */
+    .billboard{ font-size: clamp(72px, 12vw, 260px); line-height:0.92; font-weight:900; color: #ffffff; text-transform:none; letter-spacing:-1px; text-shadow: 0 6px 20px rgba(0,0,0,0.6) }
+  /* Contenedor interno para manejar marquee */
+  .billboard .inner { display:inline-block; white-space:nowrap; will-change:transform }
+  .billboard .inner span{ display:inline-block; padding:0 16px; white-space:nowrap }
+  /* Animación marquee; la duración se establecerá dinámicamente desde JS */
+  @keyframes marquee { from { transform: translateX(100%) } to { transform: translateX(-100%) } }
+  .marquee { animation-timing-function: linear; animation-iteration-count: infinite }
+    .billboard.flash{ animation: pulseScale 900ms ease forwards }
+    @keyframes pulseScale{ 0%{ transform: scale(0.98); opacity:0.9 } 50%{ transform: scale(1.02); opacity:1 } 100%{ transform: scale(1); opacity:1 } }
+
+  .controls{ display:flex; gap:8px; justify-content:flex-end; align-items:center }
+  button{ background: linear-gradient(135deg,#2563eb 0%, #7c3aed 100%); color:white; border:none; padding:8px 14px; border-radius:8px; cursor:pointer }
+    button:hover{ opacity:0.9 }
+    .btn-clear{ background:transparent; color:var(--muted); border:1px solid rgba(255,255,255,0.03); padding:8px 12px }
+
+    @media (max-width:520px){ .billboard{ padding:1.5rem } }
