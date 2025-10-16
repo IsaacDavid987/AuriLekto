@@ -310,19 +310,6 @@ function stopReconnect(){ if(reconnectTimer){ clearTimeout(reconnectTimer); reco
 
 // Auto-conectar si hay una URL en el input al cargar
 
-// Scroll suave
-document.addEventListener('DOMContentLoaded', function() {
-document.querySelectorAll('nav a[href^="#"]').forEach(function(enlace) {
-enlace.addEventListener('click', function(e) {
-const destino = document.querySelector(this.getAttribute('href'));
-if (destino) {
-e.preventDefault();
-destino.scrollIntoView({ behavior: 'smooth' });
-}
-});
-});
-});
-
 // Centralizar listeners para Main.html (evitar handlers inline)
 function registerMainListeners(){
 	const testBtn = document.getElementById('testConnectionBtn');
@@ -404,35 +391,161 @@ function applyFilter(filter){
 	});
 }
 
-// Registrar al cargar la página
-window.addEventListener('load', () => {
-	// Solo registrar si estamos en la página que contiene esos elementos
-	if(document.getElementById('testConnectionBtn') || document.getElementById('customMessageForm')){
+document.addEventListener('DOMContentLoaded', function() {
+    // --- INICIALIZACIÓN GENERAL ---
+    // Solo registrar si estamos en la página que contiene los elementos principales
+	if(document.getElementById('customMessageForm')){
 		registerMainListeners();
 	}
-});
 
-document.addEventListener('DOMContentLoaded', function() {
-  const images = [
-    "../imagenes/WhatsApp Image 2025-10-15 at 8.03.15 AM (1).jpeg",
-    "../imagenes/WhatsApp Image 2025-10-15 at 8.03.15 AM (2).jpeg",
-    "../imagenes/WhatsApp Image 2025-10-15 at 8.03.15 AM (3).jpeg",
-    "../imagenes/WhatsApp Image 2025-10-15 at 8.03.15 AM (4).jpeg",
-    "../imagenes/WhatsApp Image 2025-10-15 at 8.03.15 AM.jpeg",
-    "../imagenes/WhatsApp Image 2025-10-15 at 8.03.16 AM (1).jpeg",
-    "../imagenes/WhatsApp Image 2025-10-15 at 8.03.16 AM.jpeg"
-  ];
+    // Scroll suave para anclas
+    document.querySelectorAll('nav a[href^="#"]').forEach(function(enlace) {
+        enlace.addEventListener('click', function(e) {
+            const destino = document.querySelector(this.getAttribute('href'));
+            if (destino) {
+                e.preventDefault();
+                destino.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
 
-  let currentIndex = 0;
-  const carousel = document.querySelector('#equipo .background-carousel');
+    // --- LÓGICA DEL CARRUSEL PRINCIPAL ---
+    const track = document.getElementById('carouselTrack');
+    const wrapper = document.getElementById('carouselWrapper');
+    const slides = document.querySelectorAll('.carousel-slide');
+    const indicatorsContainer = document.getElementById('indicators');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const progressBar = document.getElementById('progressBar');
 
-  if (carousel) {
-    setInterval(() => {
-      currentIndex = (currentIndex + 1) % images.length;
-      carousel.style.backgroundImage = `url('${images[currentIndex]}')`;
-    }, 5000);
+    // Si no existen los elementos del carrusel, no continuamos.
+    if (track && wrapper && slides.length > 0 && indicatorsContainer && prevBtn && nextBtn && progressBar) {
+        let currentIndex = 0;
+        let isDragging = false;
+        let startPos = 0;
+        let currentTranslate = 0;
+        let prevTranslate = 0;
+        let animationID = 0;
 
-    // Set initial image
-    carousel.style.backgroundImage = `url('${images[0]}')`;
-  }
+        // Crear indicadores
+        slides.forEach((_, index) => {
+            const indicator = document.createElement('div');
+            indicator.classList.add('indicator');
+            if (index === 0) indicator.classList.add('active');
+            indicator.addEventListener('click', () => goToSlide(index));
+            indicatorsContainer.appendChild(indicator);
+        });
+
+        const indicators = document.querySelectorAll('.indicator');
+
+        function updateCarousel() {
+            track.style.transform = `translateX(${currentTranslate}px)`;
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (indicators[index]) indicators[index].classList.remove('active');
+            });
+            slides[currentIndex].classList.add('active');
+            if (indicators[currentIndex]) indicators[currentIndex].classList.add('active');
+        }
+
+        function goToSlide(index) {
+            currentIndex = index;
+            currentTranslate = -currentIndex * wrapper.offsetWidth;
+            prevTranslate = currentTranslate;
+            updateCarousel();
+        }
+
+        function nextSlide() {
+            currentIndex = (currentIndex < slides.length - 1) ? currentIndex + 1 : 0;
+            goToSlide(currentIndex);
+        }
+
+        function prevSlide() {
+            currentIndex = (currentIndex > 0) ? currentIndex - 1 : slides.length - 1;
+            goToSlide(currentIndex);
+        }
+
+        // Eventos de botones
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+
+        // Drag con mouse y touch
+        wrapper.addEventListener('mousedown', dragStart);
+        wrapper.addEventListener('mousemove', drag);
+        wrapper.addEventListener('mouseup', dragEnd);
+        wrapper.addEventListener('mouseleave', dragEnd);
+        wrapper.addEventListener('touchstart', dragStart);
+        wrapper.addEventListener('touchmove', drag);
+        wrapper.addEventListener('touchend', dragEnd);
+
+        function getPositionX(e) {
+            return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+        }
+
+        function dragStart(e) {
+            isDragging = true;
+            startPos = getPositionX(e);
+            animationID = requestAnimationFrame(animation);
+            track.classList.add('dragging');
+        }
+
+        function drag(e) {
+            if (isDragging) {
+                const currentPosition = getPositionX(e);
+                currentTranslate = prevTranslate + currentPosition - startPos;
+            }
+        }
+
+        function dragEnd() {
+            isDragging = false;
+            cancelAnimationFrame(animationID);
+            track.classList.remove('dragging');
+            const movedBy = currentTranslate - prevTranslate;
+            if (movedBy < -100 && currentIndex < slides.length - 1) {
+                currentIndex++;
+            }
+            if (movedBy > 100 && currentIndex > 0) {
+                currentIndex--;
+            }
+            goToSlide(currentIndex);
+        }
+
+        function animation() {
+            if (isDragging) {
+                updateCarousel();
+                requestAnimationFrame(animation);
+            }
+        }
+
+        // Auto-play con barra de progreso
+        let autoPlayInterval;
+        let progressInterval;
+        let progress = 0;
+
+        function startAutoPlay() {
+            stopAutoPlay(); // Evita múltiples intervalos
+            progress = 0;
+            progressBar.style.width = '0%';
+            progressInterval = setInterval(() => {
+                progress += 0.5;
+                progressBar.style.width = progress + '%';
+            }, 25);
+            autoPlayInterval = setInterval(() => {
+                nextSlide();
+                progress = 0;
+            }, 5000);
+        }
+
+        function stopAutoPlay() {
+            clearInterval(autoPlayInterval);
+            clearInterval(progressInterval);
+        }
+
+        wrapper.addEventListener('mouseenter', stopAutoPlay);
+        wrapper.addEventListener('mouseleave', startAutoPlay);
+
+        // Iniciar auto-play y responsive
+        startAutoPlay();
+        window.addEventListener('resize', () => goToSlide(currentIndex));
+    }
 });

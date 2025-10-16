@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>Auri Lekto</title>
+    <link rel="stylesheet" href="../Style/Main.css" />
+    <style>
+      /* Estilos generales para el carrusel */
+      .carousel-container {
+        width: 100%;
+        max-width: 1200px;
+        position: relative;
+        user-select: none;
+        margin: 40px auto; /* Centrar y dar margen */
+        padding: 0 20px;
+      }
+
+      .carousel-wrapper {
+        overflow: hidden;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        cursor: grab;
+        position: relative;
+      }
+
+      .carousel-wrapper:active {
+        cursor: grabbing;
+      }
+
+      .carousel-track {
+        display: flex;
+        transition: transform 0.5s ease;
+        will-change: transform;
+      }
+
+      .carousel-track.dragging {
+        transition: none;
+      }
+
+      .carousel-slide {
+        min-width: 100%;
+        height: 500px;
+        position: relative;
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: flex-end;
+        padding: 40px;
+        /* Fondo degradado para mejor legibilidad del texto */
+        background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), var(--slide-url);
+      }
+
+      .slide-content {
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        padding: 30px;
+        border-radius: 15px;
+        color: white;
+        max-width: 600px;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.6s ease;
+      }
+
+      .carousel-slide.active .slide-content {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      .slide-content h2 {
+        font-size: 2.5em;
+        margin-bottom: 15px;
+        font-weight: 700;
+      }
+
+      .slide-content p {
+        font-size: 1.1em;
+        line-height: 1.6;
+        opacity: 0.9;
+      }
+
+      .carousel-controls {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 20px;
+        pointer-events: none;
+        z-index: 10;
+      }
+
+      .carousel-btn {
+        pointer-events: all;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        color: #764ba2; /* Color del ícono */
+      }
+
+      .carousel-btn:hover {
+        background: white;
+        transform: scale(1.1);
+      }
+
+      .carousel-btn:active {
+        transform: scale(0.95);
+      }
+
+      .carousel-indicators {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 30px;
+      }
+
+      .indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.4); /* Ajuste para un fondo claro */
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .indicator.active {
+        background: #764ba2; /* Color principal */
+        width: 30px;
+        border-radius: 6px;
+      }
+
+      .indicator:hover {
+        background: rgba(0, 0, 0, 0.7);
+        transform: scale(1.2);
+      }
+
+      .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        width: 0;
+        transition: width 0.1s linear;
+      }
+      /* Fin de estilos del carrusel */
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1 class="main-title">Auri <span>Lekto</span></h1>
+      <nav class="main-nav">
+        <a href="#all" data-filter="all" class="nav-item active">TODO</a>
+        <a href="#mensajes" data-filter="mensajes" class="nav-item">Mensajes</a>
+        <a href="#equipo" data-filter="equipo" class="nav-item">Equipo</a>
+        <a
+          href="#quienes-somos"
+          data-filter="quienes-somos"
+          class="nav-item"
+          >Acerca de</a
+        >
+        <a href="#galeria" data-filter="galeria" class="nav-item">Galería</a>
+      </nav>
+    </header>
+    <main>
+      <section id="inicio" class="section">
+        <h2>Bienvenido</h2>
+        <p class="desc">
+          "Dale vida a tus mensajes transformándolos en experiencia".
+        </p>
+      </section>
+      <section id="mensajes" class="section">
+        <h2>📤 Enviar Mensajes</h2>
+
+        <h3 class="section-subtitle">Mensajes predeterminados</h3>
+        <div class="message-bank minimal">
+          <button
+            type="button"
+            class="autofill-btn"
+            data-autofill="Tiempo de Oración"
+          >
+            Tiempo de Oración😇
+          </button>
+          <button
+            type="button"
+            class="autofill-btn"
+            data-autofill="Horario Especial"
+          >
+            Horario Especial🕗
+          </button>
+          <button
+            type="button"
+            class="autofill-btn"
+            data-autofill="Jornada De Exámenes"
+          >
+            Jornada De Exámenes📝
+          </button>
+          <button
+            type="button"
+            class="autofill-btn"
+            data-autofill="Bienvenidos"
+          >
+            Bienvenidos👋
+          </button>
+          <button type="button" class="autofill-btn" data-autofill="Descanso">
+            Descanso😌
+          </button>
+        </div>
+
+        <div class="pantalla-mensajes">
+          <div class="pantalla-titulo">
+            <span>📺 Vista previa</span>
+            <span id="hora-local"></span>
+          </div>
+          <ul id="listaMensajes"></ul>
+        </div>
+
+        <form id="customMessageForm" class="custom-message-box">
+          <input
+            type="text"
+            id="mensajePersonalizado"
+            placeholder="Escribe tu mensaje..."
+            maxlength="100"
+            required
+          />
+          <select id="tiempoMensaje">
+            <option value="60">5 min</option>
+            <option value="120">10 min</option>
+            <option value="180">15 min</option>
+            <option value="300">20 min</option>
+            <option value="0">Permanente</option>
+          </select>
+          <button type="submit">🚀 Enviar al Receptor</button>
+        </form>
+      </section>
+
+      <section id="equipo" class="section">
+        <h2>Equipo</h2>
+        <div
+          id="funcionSeleccionada"
+          class="funcion-seleccionada"
+          aria-live="polite"
+        ></div>
+        <div class="team">
+          <div
+            class="member"
+            data-name="Jenifer Perafan"
+            data-role="Directora de Mercadeo"
+            data-desc="Encargada de la estrategia de marketing, promoción y comunicación de la empresa."
+          >
+            <h3>Jennifer Perafan</h3>
+            <p>Directora de Mercadeo</p>
+          </div>
+          <div
+            class="member"
+            data-name="Kaory Parra"
+            data-role="Jefa de Producción"
+            data-desc="Supervisa y coordina los procesos de producción para asegurar la calidad y eficiencia."
+          >
+            <h3>Kaory Parra</h3>
+            <p>Jefa de Producción</p>
+          </div>
+          <div
+            class="member"
+            data-name="Valeria Ossa"
+            data-role="Dir. De Recursos Humanos"
+            data-desc="Gestiona el talento humano, bienestar y desarrollo profesional del equipo."
+          >
+            <h3>Valeria Ossa</h3>
+            <p>Dir. De Recursos Humanos</p>
+          </div>
+          <div
+            class="member"
+            data-name="Isaac Galeano"
+            data-role="Técnico de Programación"
+            data-desc=" Encargado de escribir, probar y mantener el código para que los programas y sistemas de software funcionen correctamente."
+          >
+            <h3>Isaac Galeano</h3>
+            <p>Técnico de Programación</p>
+          </div>
+          <div
+            class="member"
+            data-name="Hellen Sanchez"
+            data-role="Jefe de Finanzas"
+            data-desc="Administra los recursos financieros, presupuestos y reportes económicos."
+          >
+            <h3>Hellen Sanchez</h3>
+            <p>Jefe de Finanzas</p>
+          </div>
+          <div
+            class="member"
+            data-name="Joan Tamayo"
+            data-role="Asesor Comercial"
+            data-desc="Responsable de la relación con clientes y asesoría en ventas."
+          >
+            <h3>Joan Tamayo</h3>
+            <p>Asesor Comercial</p>
+          </div>
+          <div
+            class="member"
+            data-name="Nicole Daza"
+            data-role="Gerente General"
+            data-desc="Responsable de la dirección y gestión general del equipo. Lidera la toma de decisiones estratégicas y representa a la empresa."
+          >
+            <h3>Nicole Daza</h3>
+            <p>Gerente General</p>
+          </div>
+        </div>
+        <div id="modalBackdrop" class="modal-backdrop" aria-hidden="true">
+  <div class="modal">
+    <img id="modalPhoto" class="modal-photo" src="" alt="Foto del Miembro" /> <h3 id="modalName">Nombre</h3>
+    <h4 id="modalRole" class="modal-role">Cargo</h4>
+    <p id="modalDesc" class="modal-desc">Descripción</p>
+    <div class="modal-footer"><button class="close">Cerrar</button></div>
+  </div>
+</div>
+      </section>
+      <section id="quienes-somos" class="section">
+        <h2>¿Quiénes somos?</h2>
+        <p class="whatus">
+          Somos un equipo de jóvenes emprendedores del Colegio Parroquial San
+          Francisco Javier de Cali. Como proyecto final de grado, creamos esta
+          microempresa con el objetivo de aplicar y demostrar los conocimientos
+          adquiridos en nuestra formación académica, transformando una idea de
+          negocio en una realidad sostenible y funcional. Nuestra iniciativa
+          representa la culminación de un esfuerzo dedicado a la innovación y la
+          gestión empresarial.
+        </p>
+      </section>
+
+      <section id="galeria" class="section">
+        <h2>Algunos de Nuestros Momentos en este Proyecto</h2>
+        <div class="carousel-container">
+          <div class="carousel-wrapper" id="carouselWrapper">
+            <div class="carousel-track" id="carouselTrack">
+              <div class="carousel-slide active" style="--slide-url: url('../imagenesIntegrantes/hellen.jpeg');">
+                <div class="slide-content">
+                  <h2>Hellen Sanchez</h2>
+                  <p>
+                    Explora paisajes impresionantes donde la naturaleza muestra su
+                    grandeza. Arrastra o usa las flechas para navegar.
+                  </p>
+                </div>
+              </div>
+              <div class="carousel-slide" style="--slide-url: url('../imagenesIntegrantes/joan.jpeg');">
+                <div class="slide-content">
+                  <h2>Playas Paradisíacas</h2>
+                  <p>
+                    Descubre las costas más hermosas del mundo, donde el mar se
+                    encuentra con el cielo en perfecta armonía.
+                  </p>
+                </div>
+              </div>
+              <div class="carousel-slide" style="--slide-url: url('../imagenesIntegrantes/kaory.jpeg');">
+                <div class="slide-content">
+                  <h2>Ciudades Vibrantes</h2>
+                  <p>
+                    Sumérgete en la energía urbana y descubre la arquitectura
+                    moderna que define nuestras metrópolis.
+                  </p>
+                </div>
+              </div>
+              <div class="carousel-slide" style="--slide-url: url('../imagenesIntegrantes/nicole.jpeg');">
+                <div class="slide-content">
+                  <h2>Bosques Encantados</h2>
+                  <p>
+                    Adéntrate en la tranquilidad de bosques milenarios donde cada
+                    rincón cuenta una historia ancestral.
+                  </p>
+                </div>
+              </div>
+              <div class="carousel-slide" style="--slide-url: url('../imagenesIntegrantes/osa.jpeg');">
+                <div class="slide-content">
+                  <h2>Aventuras Extremas</h2>
+                  <p>
+                    Para los amantes de la adrenalina, descubre lugares que
+                    desafían los límites de la emoción.
+                  </p>
+                </div>
+              </div>
+              <div class="carousel-slide" style="--slide-url: url('../imagenesIntegrantes/perafan.jpeg');">
+                <div class="slide-content">
+                  <h2>Aventuras Extremas</h2>
+                  <p>
+                    Para los amantes de la adrenalina, descubre lugares que
+                    desafían los límites de la emoción.
+                  </p>
+                </div>
+              </div>
+              <div class="carousel-slide" style="--slide-url: url('../imagenesIntegrantes/isaac.jpeg');">
+                <div class="slide-content">
+                  <h2>Aventuras Extremas</h2>
+                  <p>
+                    Para los amantes de la adrenalina, descubre lugares que
+                    desafían los límites de la emoción.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+
+          <div class="carousel-controls">
+            <button class="carousel-btn" id="prevBtn">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <button class="carousel-btn" id="nextBtn">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+
+          <div class="carousel-indicators" id="indicators"></div>
+        </div>
+      </section>
+      </main>
+
+    <div class="connection-status" id="statusIndicator">
+      🔴 Esperando conexión...
+    </div>
+
+    <footer>
+      <span>
+        © 2025 Auri Lekto - Sistema de Mensajería - Parroquial San Francisco
+        Javier-Orquideas</span
+      >
+    </footer>
+
+    <script>
+      const track = document.getElementById('carouselTrack');
+      const wrapper = document.getElementById('carouselWrapper');
+      // Usar querySelectorAll en lugar de slides para evitar problemas de reasignación
+      const getSlides = () => document.querySelectorAll('#galeria .carousel-slide');
+      const indicatorsContainer = document.getElementById('indicators');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const progressBar = document.getElementById('progressBar');
+      
+      let currentIndex = 0;
+      let isDragging = false;
+      let startPos = 0;
+      let currentTranslate = 0;
+      let prevTranslate = 0;
+      let animationID = 0;
+
+      // Crear indicadores al cargar el DOM
+      function createIndicators() {
+        indicatorsContainer.innerHTML = ''; // Limpiar antes de crear
+        getSlides().forEach((_, index) => {
+          const indicator = document.createElement('div');
+          indicator.classList.add('indicator');
+          if (index === 0) indicator.classList.add('active');
+          indicator.addEventListener('click', () => {
+            goToSlide(index);
+            stopAutoPlay();
+            startAutoPlay(); // Reiniciar el temporizador al hacer clic
+          });
+          indicatorsContainer.appendChild(indicator);
+        });
+      }
+      
+      createIndicators();
+      const indicators = document.querySelectorAll('#galeria .indicator');
+
+      function updateCarousel() {
+        track.style.transform = `translateX(${currentTranslate}px)`;
+        
+        getSlides().forEach((slide, index) => {
+          slide.classList.remove('active');
+          if (indicators[index]) indicators[index].classList.remove('active');
+        });
+        
+        getSlides()[currentIndex].classList.add('active');
+        if (indicators[currentIndex]) indicators[currentIndex].classList.add('active');
+      }
+
+      function goToSlide(index) {
+        currentIndex = index;
+        currentTranslate = -currentIndex * wrapper.offsetWidth;
+        prevTranslate = currentTranslate;
+        updateCarousel();
+      }
+
+      function nextSlide() {
+        if (currentIndex < getSlides().length - 1) {
+          currentIndex++;
+        } else {
+          currentIndex = 0;
+        }
+        goToSlide(currentIndex);
+      }
+
+      function prevSlide() {
+        if (currentIndex > 0) {
+          currentIndex--;
+        } else {
+          currentIndex = getSlides().length - 1;
+        }
+        goToSlide(currentIndex);
+      }
+
+      // Eventos de botones
+      nextBtn.addEventListener('click', () => {
+        nextSlide();
+        stopAutoPlay();
+        startAutoPlay(); // Reiniciar el temporizador
+      });
+      prevBtn.addEventListener('click', () => {
+        prevSlide();
+        stopAutoPlay();
+        startAutoPlay(); // Reiniciar el temporizador
+      });
+
+      // Drag con mouse y touch
+      wrapper.addEventListener('mousedown', dragStart);
+      wrapper.addEventListener('mousemove', drag);
+      wrapper.addEventListener('mouseup', dragEnd);
+      wrapper.addEventListener('mouseleave', dragEnd);
+
+      wrapper.addEventListener('touchstart', dragStart);
+      wrapper.addEventListener('touchmove', drag);
+      wrapper.addEventListener('touchend', dragEnd);
+
+      function dragStart(e) {
+        isDragging = true;
+        startPos = getPositionX(e);
+        animationID = requestAnimationFrame(animation);
+        track.classList.add('dragging');
+        stopAutoPlay(); // Detener el auto-play al iniciar el arrastre
+      }
+
+      function drag(e) {
+        if (isDragging) {
+          const currentPosition = getPositionX(e);
+          currentTranslate = prevTranslate + currentPosition - startPos;
+        }
+      }
+
+      function dragEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+        cancelAnimationFrame(animationID);
+        track.classList.remove('dragging');
+
+        const movedBy = currentTranslate - prevTranslate;
+        const threshold = wrapper.offsetWidth / 4; // Desplazamiento mínimo (25% del ancho)
+
+        if (movedBy < -threshold && currentIndex < getSlides().length - 1) {
+          currentIndex++;
+        } else if (movedBy > threshold && currentIndex > 0) {
+          currentIndex--;
+        }
+
+        goToSlide(currentIndex);
+        startAutoPlay(); // Reiniciar el auto-play al finalizar el arrastre
+      }
+
+      function getPositionX(e) {
+        return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+      }
+
+      function animation() {
+        updateCarousel();
+        if (isDragging) requestAnimationFrame(animation);
+      }
+
+      // Auto-play con barra de progreso
+      let autoPlayInterval;
+      let progressInterval;
+      let progress = 0;
+      const autoPlayDuration = 5000; // 5 segundos
+
+      function startAutoPlay() {
+        stopAutoPlay(); // Asegurarse de que no haya duplicados
+        
+        progress = 0;
+        progressBar.style.width = '0%';
+        
+        progressInterval = setInterval(() => {
+          progress += (100 / (autoPlayDuration / 25)); // Aumentar progreso basado en la duración
+          progressBar.style.width = progress + '%';
+        }, 25);
+
+        autoPlayInterval = setInterval(() => {
+          nextSlide();
+          progress = 0;
+          progressBar.style.width = '0%';
+        }, autoPlayDuration);
+      }
+
+      function stopAutoPlay() {
+        clearInterval(autoPlayInterval);
+        clearInterval(progressInterval);
+        progress = 0; // Opcional: mantener el ancho o resetear
+        // progressBar.style.width = '0%'; // Opcional: resetear visualmente
+      }
+
+      // Detener/Reiniciar auto-play al interactuar con el contenedor
+      wrapper.addEventListener('mouseenter', stopAutoPlay);
+      wrapper.addEventListener('mouseleave', startAutoPlay);
+
+      // Iniciar auto-play
+      startAutoPlay();
+
+      // Responsive
+      window.addEventListener('resize', () => {
+        goToSlide(currentIndex);
+      });
+    </script>
+    
+    <script src="../Script/Main.js"></script>
+    <script src="../Script/Recept.
